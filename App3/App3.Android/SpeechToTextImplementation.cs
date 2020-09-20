@@ -17,11 +17,7 @@ namespace App3.Droid
         public SpeechToTextImplementation()
         {
             _activity = CrossCurrentActivity.Current.Activity;
-
         }
-
-
-
         public void StartSpeechToText()
         {
             StartRecordingAndRecognizing();
