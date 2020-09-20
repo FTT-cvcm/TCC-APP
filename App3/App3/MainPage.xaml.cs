@@ -1,9 +1,7 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 using Xamarin.Forms;
@@ -42,15 +40,15 @@ namespace App3
             });
         }
 
-        private async void SpeechToTextFinalResultRecieved(string args)
+        private void SpeechToTextFinalResultRecieved(string args)
         {
             recon.Text = args;
-            await DisplayAlert("Gravação", "Transcrição do aúdio: " + args, "OK");
-            await DisplayAlert("Análise", await analiseSentimento(args), "OK");
         }
 
         private void Button_Clicked(object sender, EventArgs e)
-        {            
+        {
+            DisplayAlert("Gravação", "Transcrição do aúdio", "OK");
+            DisplayAlert("Análise", "Análise de Sentimento", "OK");
             try
             {
                 _speechRecongnitionInstance.StartSpeechToText();
@@ -59,29 +57,6 @@ namespace App3
             {
                 recon.Text = ex.Message;
             }
-        }
-
-        static async Task<String> analiseSentimento(string texto)
-        {
-            // ... Use HttpClient.
-            HttpClient client = new HttpClient();
-
-            var byteArray = Encoding.ASCII.GetBytes("1575-12+AosVZ:tVmYCvtDx1BJ2sF6GEK6Wj1GQUdY1ulynqGkqQ9zr5BF");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", Convert.ToBase64String(byteArray));
-
-            var data = new { T = texto, SL = "PtBr", EM = "True" };
-            var content = new StringContent(JsonConvert.SerializeObject(data), Encoding.UTF8, "application/json");
-
-            HttpResponseMessage response = await client.PostAsync("https://api.gotit.ai/NLU/v1.4/Analyze", content);
-            HttpContent responseContent = response.Content;
-
-            // ... Check Status Code                                            
-            //Console.WriteLine("Response StatusCode: " + (int)response.StatusCode);
-
-            // ... Read the string.
-            string result = await responseContent.ReadAsStringAsync();
-
-            return result;
         }
     }
 }

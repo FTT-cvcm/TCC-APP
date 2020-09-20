@@ -15,7 +15,7 @@
                 VerticalOptions="CenterAndExpand"
                 HorizontalOptions="Center"
                 Clicked="Button_Clicked"></Button>
-        <Label IsVisible='False' x:Name="recon" Text="Texto convertido" FontSize="16" Padding="30,0,30,0"/>
+        <Label x:Name="recon" Text="Texto convertido" FontSize="16" Padding="30,0,30,0"/>
     </StackLayout>
 
 </ContentPage>
