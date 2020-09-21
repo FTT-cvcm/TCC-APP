@@ -1,7 +1,10 @@
-﻿using Newtonsoft.Json;
+﻿using Nancy.Json;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Text;
@@ -13,6 +16,7 @@ namespace App3
     public partial class MainPage : ContentPage
     {
         private ISpeechToText _speechRecongnitionInstance;
+
         public MainPage()
         {
             InitializeComponent();
@@ -46,7 +50,10 @@ namespace App3
         {
             recon.Text = args;
             await DisplayAlert("Gravação", "Transcrição do aúdio: " + args, "OK");
-            await DisplayAlert("Análise", await analiseSentimento(args), "OK");
+            if (analisaResultadoAPI(await analiseSentimento(args)))
+                await DisplayAlert("Análise", "Existem indícios de comportamento agressivo" , "OK");
+            else
+                await DisplayAlert("Análise", "Não existem indícios de comportamento agressivo", "OK");
         }
 
         private void Button_Clicked(object sender, EventArgs e)
@@ -83,5 +90,19 @@ namespace App3
 
             return result;
         }
+
+        bool analisaResultadoAPI(string resultado)
+        {
+            JObject JSON = JObject.Parse(resultado);
+            string raiva = (string)JSON["emotions"]["anger"];
+            string medo = (string)JSON["emotions"]["fear"];
+            if (Convert.ToDouble(raiva) > 0.8)
+                return true;
+            if (Convert.ToDouble(medo) > 0.8)
+                return true;
+            return false;
+        }
+
+        
     }
 }
