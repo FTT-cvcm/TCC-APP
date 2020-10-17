@@ -1,4 +1,7 @@
-﻿using Nancy.Json;
+﻿using App3.Model;
+using App3.ViewModels;
+using App3.Views;
+using Nancy.Json;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -13,13 +16,20 @@ using Xamarin.Forms;
 
 namespace App3
 {
-    public partial class MainPage : ContentPage
+    public partial class AnaliseView : ContentPage
     {
         private ISpeechToText _speechRecongnitionInstance;
 
-        public MainPage()
+        public bool PerfilAgressivo { get; set; }
+        public string TextoCapturado { get; set; }
+        public Analise analise { get; set; }
+        public AnaliseViewModel viewModel {get; set;}
+        public AnaliseView()
         {
             InitializeComponent();
+            this.viewModel = new AnaliseViewModel();
+            this.BindingContext = viewModel;
+
             try
             {
                 _speechRecongnitionInstance = DependencyService.Get<ISpeechToText>();
@@ -48,12 +58,23 @@ namespace App3
 
         private async void SpeechToTextFinalResultRecieved(string args)
         {
+
+            // A MÁGICA ACONTECE AQUI !!!!!
+                        
+
             recon.Text = args;
-            await DisplayAlert("Gravação", "Transcrição do aúdio: " + args, "OK");
-            if (analisaResultadoAPI(await analiseSentimento(args)))
-                await DisplayAlert("Análise", "Existem indícios de comportamento agressivo" , "OK");
-            else
-                await DisplayAlert("Análise", "Não existem indícios de comportamento agressivo", "OK");
+            TextoCapturado = args;
+            PerfilAgressivo = analisaResultadoAPI(await analiseSentimento(TextoCapturado));
+
+            analise = new Analise(TextoCapturado, PerfilAgressivo);
+            viewModel.analise = analise;
+            viewModel.SalvarAnaliseDB();
+
+            /* if (analisaResultadoAPI(await analiseSentimento(args)))
+                 await DisplayAlert("Análise", "Existem indícios de comportamento agressivo" , "OK");
+             else
+                 await DisplayAlert("Análise", "Não existem indícios de comportamento agressivo", "OK");*/
+
         }
 
         private void Button_Clicked(object sender, EventArgs e)
@@ -103,6 +124,25 @@ namespace App3
             return false;
         }
 
-        
+        protected override void OnAppearing()
+        {
+            base.OnAppearing();
+
+            MessagingCenter.Subscribe<AnaliseViewModel>(this, "VerAnaliseAudios",
+                (msg) =>
+                {
+                    Navigation.PushAsync(new RelatorioAnalisesView());
+                }
+                );
+           
+        }
+        protected override void OnDisappearing()
+        {
+            base.OnDisappearing();
+            MessagingCenter.Unsubscribe<AnaliseViewModel>(this, "VerAnaliseAudios");
+            
+        }
+
+
     }
 }

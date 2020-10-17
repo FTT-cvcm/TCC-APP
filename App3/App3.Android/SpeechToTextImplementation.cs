@@ -19,9 +19,6 @@ namespace App3.Droid
             _activity = CrossCurrentActivity.Current.Activity;
 
         }
-
-
-
         public void StartSpeechToText()
         {
             StartRecordingAndRecognizing();
